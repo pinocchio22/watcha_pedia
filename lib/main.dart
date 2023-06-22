@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'book.dart';
 import 'book_service.dart';
@@ -135,7 +136,16 @@ class BookTile extends StatelessWidget {
     BookService bookService = context.read<BookService>();
 
     return ListTile(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewPage(
+              url: book.previewLink.replaceFirst("http", "https"),
+            ),
+          ),
+        );
+      },
       leading: Image.network(
         book.thumbnail,
         fit: BoxFit.fitHeight,
@@ -145,7 +155,9 @@ class BookTile extends StatelessWidget {
         style: TextStyle(fontSize: 16),
       ),
       subtitle: Text(
-        book.subtitle,
+        "${book.authors.map(
+              (e) => e,
+            ).toString().replaceAll('(', "").replaceAll(')', "")}\n${book.publishedDate}",
         style: TextStyle(color: Colors.grey),
       ),
       trailing: IconButton(
@@ -168,10 +180,42 @@ class LikedBookPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<BookService>(
+      builder: (context, bookService, child) {
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: ListView.separated(
+              itemCount: bookService.likedBookList.length,
+              separatorBuilder: (context, index) {
+                return Divider();
+              },
+              itemBuilder: (context, index) {
+                if (bookService.likedBookList.isEmpty) return SizedBox();
+                Book book = bookService.likedBookList.elementAt(index);
+                return BookTile(book: book);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class WebViewPage extends StatelessWidget {
+  WebViewPage({super.key, required this.url});
+
+  String url;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text("좋아요"),
+      appBar: AppBar(
+        backgroundColor: Colors.grey,
+        title: Text(url),
       ),
+      body: WebView(initialUrl: url),
     );
   }
 }

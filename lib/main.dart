@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'book.dart';
 import 'book_service.dart';
 
-void main() {
+late SharedPreferences sPref;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  sPref = await SharedPreferences.getInstance();
   runApp(
     MultiProvider(
       providers: [
